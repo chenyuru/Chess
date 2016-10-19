@@ -9,26 +9,34 @@ public class Pannel {
 	final static public int GREEN =2;
 	final static int ROW =6;
 	final static int COL =7;
-//	private Button[][] buttons =new Button[ROW][COL];
 	private ArrayList<PannelState> statesStack = new ArrayList<>();
 	
 	int getCurrentState(int i,int j){
 		int size = statesStack.size();
 		return statesStack.get(size-1).states[i][j];
 	}
-	boolean isLegalToPut(int i,int j,int color){
+	
+	
+	boolean isLegalToPut(int i,int j){
 		int state = getCurrentState(i, j);
 		if(state == EMPTY){
+			for(int s = i+1;i<ROW;s++){
+				if(getCurrentState(s, j) == EMPTY){
+					return false;
+				}
+			}
 			return true;
 		}
-		return false;
+		else{
+			return false;
+		}
 	}
 	
 	//add state
 	boolean put(int i,int j,int color){
 		int size = statesStack.size();
 		PannelState newPan =new PannelState(statesStack.get(size-1));
-		if(isLegalToPut(size, j, color)){
+		if(isLegalToPut(size, j)){
 			newPan.states[i][j] = color;
 			statesStack.add(newPan);
 			return true;
@@ -130,7 +138,26 @@ public class Pannel {
 		return pls;
 	}
 	
-	//return null if empty return newest state
+	//return null if not over
+	ArrayList<PannelLocate> getAllOverLocate(int i,int j){
+		ArrayList<PannelLocate> locates =new ArrayList<>();
+		ArrayList<PannelLocate> temp = null;
+		if((temp=isHorizonOver(i, j))!=null){
+			locates.addAll(temp);
+		}
+		if((temp=isVerticalOver(i, j))!=null){
+			locates.addAll(temp);
+		}
+		if((temp=isPosiOver(i, j))!=null){
+			locates.addAll(temp);
+		}
+		if((temp=isNegaOver(i, j))!=null){
+			locates.addAll(temp);
+		}
+		return locates;
+	}
+	
+	//return null if empty, return newest state
 	PannelState regret(){
 		int size =statesStack.size();
 		if(size == 0)
@@ -141,14 +168,14 @@ public class Pannel {
 		return statesStack.get(size-2);
 	}
 	
-//	public static PannelLocate getLocateByIndex(int index){
-//		for(int i=0;i<ROW;i++)
-//			for(int j=0;j<COL;j++){
-//				{
-//					if(i*COL+j==index)
-//						
-//				}
-//	}
+	public static PannelLocate getLocateByIndex(int index){
+		for(int i=0;i<ROW;i++)
+			for(int j=0;j<COL;j++)
+				if(i*COL+j==index)
+					return new PannelLocate(i, j);
+		return null;
+	}
+	
 	class PannelState{
 		public int[][] states = new int[ROW][COL];
 		public void setState(int i,int j,int state){
@@ -167,15 +194,6 @@ public class Pannel {
 				for(int j=0;j<COL;j++){
 					states[i][j] =p.states[i][j];
 				}
-		}
-	}
-	
-	class PannelLocate{
-		public int i;
-		public int j;
-		public PannelLocate(int i,int j){
-			this.i=i;
-			this.j=j;
 		}
 	}
 	
